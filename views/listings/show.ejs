@@ -1,0 +1,129 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+  <!-- Listing Display -->
+  <div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow-lg border-0">
+        <div class="row g-0">
+          <div class="col-md-6">
+            <img src="<%= listing.image.url %>" class="img-fluid rounded-start w-100 h-100 object-fit-cover" alt="listing-image" style="min-height: 350px; object-fit: cover;">
+          </div>
+          <div class="col-md-6 d-flex flex-column justify-content-between p-4">
+            <div>
+              <h2 class="mb-3 fw-bold"><%= listing.title %></h2>
+              <p class="mb-2 text-muted">Owned by <i><%= listing.owner ? listing.owner.username : 'Unknown' %></i></p>
+              <p class="mb-2"><i class="fa fa-map-marker-alt me-2"></i><%= listing.location %>, <%= listing.country %></p>
+              <p class="mb-2"><span class="badge bg-success fs-6">&#8377; <%= listing.price %></span></p>
+              <p class="mb-3"><%= listing.description %></p>
+            </div>
+            <div class="d-flex gap-2">
+              <% if (currentUser && listing.owner && listing.owner._id && listing.owner._id.toString() === currentUser._id.toString()) { %>
+                <a href="/listings/<%= listing._id %>/edit" class="btn btn-outline-primary">Edit</a>
+                <form class="d-inline" method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+                  <button class="btn btn-outline-danger">Delete</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leave a Review -->
+  <div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow-sm border-0 p-4">
+        <h4 class="mb-4">Leave a Review</h4>
+        <% if (currentUser) { %>
+          <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label for="rating" class="form-label">Rating</label>
+              <div class="d-flex align-items-center">
+                <!--  Correct name attribute for nested review object -->
+                <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range" style="width: 200px;" value="3" required>
+                <span class="ms-2" id="ratingValue">3 ⭐</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="comment" class="form-label">Comments</label>
+              <!-- Correct name attribute -->
+              <textarea name="review[comment]" id="comment" rows="3" class="form-control" required placeholder="Share your experience..."></textarea>
+              <div class="invalid-feedback">Please add some comments for review</div>
+            </div>
+            <button type="submit" class="btn btn-success">Submit Review</button>
+          </form>
+        <% } else { %>
+          <div class="alert alert-info">You must <a href="/login">log in</a> to leave a review.</div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Reviews -->
+  <div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow-sm border-0 p-4">
+        <h4 class="mb-4">All Reviews</h4>
+        <div class="row">
+          <% if (listing.reviews.length === 0) { %>
+            <p class="text-muted">No reviews yet.</p>
+          <% } else { %>
+            <% for(let review of listing.reviews) { %>
+              <div class="col-md-6 mb-3">
+                <div class="card h-100 border-0 shadow-sm">
+                  <div class="card-body px-4">
+                    <div class="d-flex align-items-center mb-2">
+                      <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; font-size: 1.2em;">
+                        <%= review.author && review.author.username ? review.author.username.charAt(0).toUpperCase() : '?' %>
+                      </div>
+                      <h5 class="card-title mb-0">@<%= review.author && review.author.username ? review.author.username : 'Unknown' %></h5>
+                    </div>
+                    <p class="card-text mb-2">Rating: <span style="color: #ffc107; font-size: 1.2em;"><%= "⭐".repeat(review.rating) %></span></p>
+                    <p class="card-text mb-3" style="min-height: 3em;"><%= review.comment %></p>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <p class="text-muted mb-0"><small>Reviewed on: <%= review.createdAt.toLocaleDateString() %></small></p>
+                      <% if (currentUser && review.author && review.author._id && review.author._id.toString() === currentUser._id.toString()) { %>
+                        <form class="d-inline" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+                          <button class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⭐ JS to show live rating -->
+<script>
+  const form = document.querySelector('.needs-validation');
+  if (form) {
+    form.addEventListener('submit', function(event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    });
+  }
+
+  const ratingInput = document.getElementById('rating');
+  const ratingDisplay = document.getElementById('ratingValue');
+  function updateRatingDisplay() {
+    if (ratingInput && ratingDisplay) {
+      const rating = ratingInput.value;
+      ratingDisplay.textContent = `${rating} ${'⭐'.repeat(parseInt(rating))}`;
+    }
+  }
+  if (ratingInput) {
+    updateRatingDisplay();
+    ratingInput.addEventListener('input', updateRatingDisplay);
+  }
+</script>

@@ -1,0 +1,93 @@
+<% layout("layouts/boilerplate") %>
+
+<style>
+  #filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter {
+    text-align: center;
+    margin-right: 2rem;
+    margin-top: 2rem;
+    opacity: 0.7;
+  }
+
+  .filter:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .filter p {
+    font-size: 0.8rem;
+  }
+
+  .tax-toggle {
+    border: 1px solid black;
+    border-radius: 1rem;
+    height: 3.25rem;
+    padding: 1rem;
+    margin-left: 3rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .tax-info {
+    display: none;
+  }
+</style>
+
+<div id="filters">
+  <div class="filter"><div><i class="fa-solid fa-fire"></i></div><p>Trending</p></div>
+  <div class="filter"><div><i class="fa-solid fa-fire"></i></div><p>Rooms</p></div>
+  <div class="filter"><div><i class="fa-solid fa-mountain-city"></i></div><p>Iconic cities</p></div>
+  <div class="filter"><div><i class="fa-solid fa-mountain-sun"></i></div><p>Mountains</p></div>
+  <div class="filter"><div><i class="fa-solid fa-chess-rook"></i></div><p>Castles</p></div>
+  <div class="filter"><div><i class="fa-solid fa-person-swimming"></i></div><p>Amazing Pools</p></div>
+  <div class="filter"><div><i class="fa-solid fa-route"></i></div><p>Camping</p></div>
+  <div class="filter"><div><i class="fa-solid fa-cow"></i></div><p>Farms</p></div>
+  <div class="filter"><div><i class="fa-solid fa-snowflake"></i></div><p>Arctic</p></div>
+  <div class="filter"><div><i class="fa-solid fa-igloo"></i></div><p>Domes</p></div>
+  <div class="filter"><div><i class="fa-solid fa-sailboat"></i></div><p>Boats</p></div>
+
+  <div class="tax-toggle">
+    <div class="form-check reverse form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+      <label class="form-check-label" for="switchCheckDefault">Display total after taxes</label>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4 mt-3">
+    <% for (let listing of listings) { %>
+      <div class="col">
+        <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+          <div class="card col shadow-sm border-0 h-100" listing-card>
+            <img src="<%= listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80' %>"
+                 class="card-img-top" alt="Listing Image"
+                 style="height: 15rem; object-fit: cover; background: #f8f9fa;">
+            <div class="card-body px-4">
+              <h5 class="card-title"><%= listing.title %></h5>
+              <p class="card-text mt-3"><strong>Price:</strong> ₹<%= listing.price %></p>
+              <p class="card-text"><%= listing.location %>, <%= listing.country %> 
+                <span class="tax-info"> &nbsp;&nbsp;+18% GST</span>
+              </p>
+            </div>
+          </div>
+        </a>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  const taxSwitch = document.getElementById("switchCheckDefault");
+  taxSwitch.addEventListener("click", () => {
+    const taxInfoElements = document.querySelectorAll(".tax-info");
+    taxInfoElements.forEach(info => {
+      info.style.display = (info.style.display === "inline") ? "none" : "inline";
+    });
+  });
+</script>
